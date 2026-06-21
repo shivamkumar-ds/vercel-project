@@ -1,17 +1,24 @@
-import json
-import numpy as np
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+import json, numpy as np
 from pathlib import Path
+
+app = FastAPI()
 
 DATA_PATH = Path(__file__).parent / "telemetry.json"
 with open(DATA_PATH) as f:
     TELEMETRY = json.load(f)
 
-def handler(request):
+@app.api_route("/", methods=["GET", "POST", "OPTIONS"])
+async def analytics(request: Request):
     if request.method == "OPTIONS":
-        from http.server import BaseHTTPRequestHandler
-        pass
-    
-    body = request.json()
+        return JSONResponse({}, headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        })
+
+    body = await request.json()
     regions = body.get("regions", [])
     threshold_ms = body.get("threshold_ms", 180)
 
@@ -26,10 +33,6 @@ def handler(request):
             "avg_uptime": round(float(np.mean(uptimes)), 4),
             "breaches": int(sum(1 for l in latencies if l > threshold_ms))
         }
-
-    from flask import Response
-    return Response(
-        json.dumps(result),
-        mimetype="application/json",
-        headers={"Access-Control-Allow-Origin": "*"}
-    )
+    return JSONResponse(content=result, headers={
+        "Access-Control-Allow-Origin": "*"
+    })

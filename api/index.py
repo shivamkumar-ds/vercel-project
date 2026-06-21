@@ -9,19 +9,19 @@ DATA_PATH = Path(__file__).parent / "telemetry.json"
 with open(DATA_PATH) as f:
     TELEMETRY = json.load(f)
 
-@app.api_route("/", methods=["GET", "POST", "OPTIONS"])
-async def analytics(request: Request):
-    if request.method == "OPTIONS":
-        return JSONResponse({}, headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-        })
+@app.options("/")
+async def options():
+    return JSONResponse({}, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+    })
 
+@app.post("/")
+async def analytics(request: Request):
     body = await request.json()
     regions = body.get("regions", [])
     threshold_ms = body.get("threshold_ms", 180)
-
     result = {}
     for region in regions:
         records = [r for r in TELEMETRY if r["region"] == region]

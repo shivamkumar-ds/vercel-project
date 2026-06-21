@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import json, numpy as np
 from pathlib import Path
 
@@ -8,6 +9,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -35,4 +37,4 @@ async def analytics(request: Request):
             "breaches": int(sum(1 for l in latencies if l > threshold_ms))
         }
 
-    return result
+    return JSONResponse(content=result, headers={"Access-Control-Allow-Origin": "*"})

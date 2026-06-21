@@ -36,4 +36,4 @@ async def analytics(request: Request):
             "avg_uptime": round(float(np.mean(uptimes)), 4),
             "breaches": int(sum(1 for l in latencies if l > threshold_ms))
         }
-    return JSONResponse(content=result, headers=CORS_HEADERS)
+    return JSONResponse(content={"regions": result}, headers=CORS_HEADERS)

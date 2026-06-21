@@ -1,4 +1,4 @@
-from fastapi import FASTAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import json, numpy as np
 from pathlib import Path
@@ -21,7 +21,7 @@ with open(DATA_PATH) as f:
 @app.post("/")
 async def handle_post(request: Request):
     body = await request.json()
-    regions = body.get("region",[])
+    regions = body.get("regions",[])
     threshold = body.get("threshold",0)
 
     results = {}

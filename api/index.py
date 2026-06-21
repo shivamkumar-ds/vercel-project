@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import json, numpy as np
 from pathlib import Path
 
@@ -10,7 +9,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -29,12 +28,10 @@ async def analytics(request: Request):
         records = [r for r in TELEMETRY if r["region"] == region]
         latencies = [r["latency_ms"] for r in records]
         uptimes = [r["uptime_pct"] for r in records]
-
         result[region] = {
             "avg_latency": round(float(np.mean(latencies)), 4),
             "p95_latency": round(float(np.percentile(latencies, 95)), 4),
             "avg_uptime": round(float(np.mean(uptimes)), 4),
             "breaches": int(sum(1 for l in latencies if l > threshold_ms))
         }
-
-    return JSONResponse(content=result, headers={"Access-Control-Allow-Origin": "*"})
+    return result

@@ -5,17 +5,20 @@ from pathlib import Path
 
 app = FastAPI()
 
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Expose-Headers": "Access-Control-Allow-Origin",
+}
+
 DATA_PATH = Path(__file__).parent / "telemetry.json"
 with open(DATA_PATH) as f:
     TELEMETRY = json.load(f)
 
 @app.options("/")
 async def options():
-    return JSONResponse({}, headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    })
+    return JSONResponse({}, headers=CORS_HEADERS)
 
 @app.post("/")
 async def analytics(request: Request):
@@ -33,6 +36,4 @@ async def analytics(request: Request):
             "avg_uptime": round(float(np.mean(uptimes)), 4),
             "breaches": int(sum(1 for l in latencies if l > threshold_ms))
         }
-    return JSONResponse(content=result, headers={
-        "Access-Control-Allow-Origin": "*"
-    })
+    return JSONResponse(content=result, headers=CORS_HEADERS)
